@@ -12,7 +12,9 @@
                 else dict.Add(item, 1);
             }
 
-            return dict;
+            var dict2 = dict.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+
+            return dict2;
         }
     }
 }
