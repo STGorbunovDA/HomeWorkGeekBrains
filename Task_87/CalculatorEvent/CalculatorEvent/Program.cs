@@ -8,7 +8,19 @@
     * 3. Доработайте программу калькулятор реализовав выбор действий и вывод результатов на экран 
          в цикле так чтобы калькулятор мог работать до тех пор пока пользователь не нажмет отмена 
          или введёт пустую строку.
+    
+    * 4. Доработайте класс калькулятора способным работать как с целочисленными так 
+         и с дробными числами. (возможно стоит задействовать перегрузку операций).
+    
+    * 5. Заменить Convert.ToDouble на собственный DoubleTryPars и обрабатываем ошибку
+    
+    * 6. Проверить что введенное число небыло отрицательное (вывести ошибку Exeption , отловить Catch)4
+    
+    * 7. Сумма не может быть отрицательной (при делении и вычитании)
 */
+
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 
 namespace CalculatorEvent;
 
@@ -21,7 +33,7 @@ class Program
         calc.MyEventHandler += Calc_MyEventHandler;
 
         // Выводим приветствие и инструкцию пользователю
-        Console.WriteLine("Добро пожаловать в калькулятор! Введите число и действие (+, -, *, /),\nлибо введите 'отмена' или пустую строку для выхода.");
+        Console.WriteLine("Добро пожаловать в калькулятор! Введите число и действие через пробел (+, -, *, /),\nлибо введите 'отмена' или пустую строку для выхода.");
 
         string input;
         do
@@ -43,13 +55,12 @@ class Program
                 continue;
             }
 
-            if (!int.TryParse(parts[0], out int number))
+            if (!string.IsNullOrEmpty(calc.DoubleTryPars(parts[0], out double number)))
             {
                 Console.WriteLine("Неверный формат числа. Попробуйте снова.");
                 continue;
             }
 
-            // Выполняем действие в зависимости от оператора
             switch (parts[1])
             {
                 case "+":
@@ -62,7 +73,14 @@ class Program
                     calc.Multy(number);
                     break;
                 case "/":
-                    calc.Divide(number);
+                    try
+                    {
+                        calc.Divide(number);
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        Console.WriteLine($"Ошибка: {ex.Message}");
+                    }
                     break;
                 default:
                     Console.WriteLine("Неверный оператор. Попробуйте снова.");

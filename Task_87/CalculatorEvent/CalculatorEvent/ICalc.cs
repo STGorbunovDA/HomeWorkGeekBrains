@@ -7,11 +7,10 @@
 
         public event EventHandler<EventArgs> MyEventHandler;
 
-        void Divide(int x);
-        void Multy(int x);
-        void Sum(int x);
-        void Sub(int x);
+        void Divide(double x);
+        void Multy(double x);
+        void Sum(double x);
+        void Sub(double x);
         void CancelLast();
-
     }
 }
