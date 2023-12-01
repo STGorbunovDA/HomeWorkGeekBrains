@@ -1,6 +1,6 @@
 ﻿using Network.Shared;
 
-namespace Network.Client.Services
+namespace ServicesLib
 {
     public interface IPrintMessage
     {

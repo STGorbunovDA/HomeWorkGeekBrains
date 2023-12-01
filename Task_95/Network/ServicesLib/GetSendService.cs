@@ -1,11 +1,11 @@
-﻿using Network.Shared;
-using Network.Shared.Dtos;
-using System.Text;
+﻿using Network.Shared.Dtos;
+using Network.Shared;
 using System.Text.Json;
+using System.Text;
 
-namespace Network.Client.Services
+namespace ServicesLib
 {
-    public class GetSend : IGetSend
+    public class GetSendService : IGetSend
     {
         public async Task<ServiceResponse<byte[]>> FormingMessageForSend(Message message)
         {
@@ -16,6 +16,7 @@ namespace Network.Client.Services
 
             return await Task.FromResult(response);
         }
+
         public async Task<Message> FormingMessageForGet(byte[] sendMessage)
         {
             if (sendMessage is null)
