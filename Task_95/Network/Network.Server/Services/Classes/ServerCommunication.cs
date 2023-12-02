@@ -3,7 +3,6 @@ using ServicesLib;
 using System.Net.Sockets;
 using System.Net;
 using Network.Shared;
-using System.Threading.Tasks;
 
 namespace Network.Server.Services.Classes
 {
@@ -21,7 +20,9 @@ namespace Network.Server.Services.Classes
             _getSendService = getSendService;
             _printMessage = printMessage;
             _udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, 12345));
+            _iPEndPoint = (IPEndPoint)_udpClient.Client.LocalEndPoint;
             _isServerRunning = true;
+
         }
 
         public void Start()
@@ -30,9 +31,12 @@ namespace Network.Server.Services.Classes
 
             LoopClients();
 
-            _udpClient.Close();
+            Console.Write("Cервер остановлен.");
+        }
 
-            Console.WriteLine("Sервер остановлен.");
+        public void Stop()
+        {
+            _udpClient.Close();
         }
 
         private async void LoopClients()
@@ -62,7 +66,9 @@ namespace Network.Server.Services.Classes
 
         private async Task HandleClientAsync()
         {
-            byte[] buffer = _udpClient.Receive(ref _iPEndPoint);
+            var receiveResult = await _udpClient.ReceiveAsync();
+            byte[] buffer = receiveResult.Buffer;
+            _iPEndPoint = receiveResult.RemoteEndPoint as IPEndPoint; // Сохраняем адрес клиента
 
             var message = await _getSendService.FormingMessageForGet(buffer);
 
@@ -77,6 +83,7 @@ namespace Network.Server.Services.Classes
             await SendMessageAsync(new string[3] { "Сообщение принято сервером", "Server", message.NickNameTo.ToString() });
         }
 
+
         private async Task<bool> SendMessageAsync(string[] parts)
         {
             Message message = new Message(parts[0], new UserEntity(parts[1]), new UserEntity(parts[2]));
@@ -86,7 +93,8 @@ namespace Network.Server.Services.Classes
             if (sendMessage is null)
                 return await Task.FromResult(false);
 
-            await _udpClient.SendAsync(sendMessage.Data, sendMessage.Data.Length, _iPEndPoint);
+            if (_iPEndPoint is not null && !_iPEndPoint.Address.ToString().Equals("0.0.0.0"))
+                await _udpClient.SendAsync(sendMessage.Data, sendMessage.Data.Length, _iPEndPoint);
 
             return await Task.FromResult(true);
         }

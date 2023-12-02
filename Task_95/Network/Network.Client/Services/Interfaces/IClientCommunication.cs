@@ -2,8 +2,8 @@
 {
     public interface IClientCommunication
     {
-        bool SendMessage(string[] parts);
-        bool GetMessage();
+        Task<bool> SendMessageAsync(string[] parts);
+        Task<bool> GetMessage();
         void Close();
     }
 }

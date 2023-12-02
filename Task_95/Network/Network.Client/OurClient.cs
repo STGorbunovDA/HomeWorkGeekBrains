@@ -40,9 +40,9 @@ namespace Network.Client
                     continue;
                 }
 
-                if (_clientCommunication.SendMessage(parts))
+                if (_clientCommunication.SendMessageAsync(parts).Result)
                 {
-                    if (!_clientCommunication.GetMessage())
+                    if (!_clientCommunication.GetMessage().Result)
                     {
                         Console.WriteLine("Клиент: Ошибка обработки сообщения или сервер остановлен.");
                         break;

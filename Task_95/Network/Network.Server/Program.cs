@@ -14,7 +14,6 @@ namespace Network.Server
                 new UdpClient(), new GetSendService(), new PrintMessage());
             OurServer ourServer = new(serverCommunication);
             ourServer.Started();
-            Console.ReadLine();
         }
     }
 }

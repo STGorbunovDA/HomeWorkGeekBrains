@@ -21,38 +21,47 @@ namespace Network.Client.Services.Classes
             _iPEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 12345);
         }
 
-        public bool SendMessage(string[] parts)
+        public async Task<bool> SendMessageAsync(string[] parts)
         {
             Message message = new Message(parts[0], new UserEntity(parts[1]), new UserEntity(parts[2]));
 
-            var sendMessage = _getSendService.FormingMessageForSend(message).Result;
+            var sendMessage = await _getSendService.FormingMessageForSend(message);
 
             if (sendMessage is null)
-                return false;
+                return await Task.FromResult(false);
 
-            _udpClient.Send(sendMessage.Data, sendMessage.Data.Length, _iPEndPoint);
 
-            return true;
+            await _udpClient.SendAsync(sendMessage.Data, sendMessage.Data.Length, _iPEndPoint);
+
+            return await Task.FromResult(true);
         }
 
-        public bool GetMessage()
+        public async Task<bool> GetMessage()
         {
-            byte[] buffer = _udpClient.Receive(ref _iPEndPoint);
-
-            var getMessage = _getSendService.FormingMessageForGet(buffer).Result;
-
-            if (getMessage is null)
+            try
             {
-                Console.WriteLine("Клиент: Ошибка обработки сообщения.");
-                return false;
+                var receiveResult = await _udpClient.ReceiveAsync();
+                byte[] buffer = receiveResult.Buffer;
+
+                Message? getMessage = await _getSendService.FormingMessageForGet(buffer);
+
+                if (getMessage is null)
+                {
+                    Console.WriteLine("Клиент: Ошибка обработки сообщения.");
+                    return await Task.FromResult(false);
+                }
+
+                _printMessage.Print(getMessage);
+
+                if (getMessage.Text.Equals("Сервер остановлен"))
+                    return await Task.FromResult(false);
+
+                return await Task.FromResult(true);
             }
-
-            _printMessage.Print(getMessage);
-
-            if (getMessage.Text.Equals("Сервер остановлен"))
-                return false;
-
-            return true;
+            catch
+            {
+                return await Task.FromResult(false);
+            }
         }
 
         public void Close()
